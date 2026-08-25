@@ -1,8 +1,7 @@
 import streamlit as st
 import os
-import shutil
 
-# Streamlit Page Config
+# Streamlit Page Configuration
 st.set_page_config(
     page_title="Mamata Balesh Kamagoudar | AI/ML & Full-Stack Portfolio",
     page_icon="⚡",
@@ -21,25 +20,24 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 base_dir = os.path.dirname(__file__)
-dist_dir = os.path.join(base_dir, "dist")
-static_dir = os.path.join(base_dir, "static")
+static_index = os.path.join(base_dir, "static", "index.html")
 
-# Automatically sync dist build output to static folder if dist exists
-if os.path.exists(dist_dir):
+if not os.path.exists(static_index):
+    static_index = os.path.join(base_dir, "dist", "index.html")
+
+if os.path.exists(static_index):
+    with open(static_index, "r", encoding="utf-8") as f:
+        html_code = f.read()
+
+    # Rewrite relative asset URLs to absolute Streamlit static routes
+    html_code = html_code.replace('src="./assets/', 'src="/app/static/assets/')
+    html_code = html_code.replace('href="./assets/', 'href="/app/static/assets/')
+    html_code = html_code.replace('src="/assets/', 'src="/app/static/assets/')
+    html_code = html_code.replace('href="/assets/', 'href="/app/static/assets/')
+
+    st.components.v1.html(html_code, height=4000, scrolling=True)
+else:
     try:
-        if not os.path.exists(static_dir):
-            shutil.copytree(dist_dir, static_dir)
-        else:
-            # Sync index.html and assets
-            shutil.copy(os.path.join(dist_dir, "index.html"), os.path.join(static_dir, "index.html"))
-            dist_assets = os.path.join(dist_dir, "assets")
-            static_assets = os.path.join(static_dir, "assets")
-            if os.path.exists(dist_assets):
-                os.makedirs(static_assets, exist_ok=True)
-                for f in os.listdir(dist_assets):
-                    shutil.copy(os.path.join(dist_assets, f), os.path.join(static_assets, f))
-    except Exception:
-        pass
-
-# Render the React Cyberpunk Portfolio from Streamlit's static route
-st.components.v1.iframe("/app/static/index.html", height=4000, scrolling=True)
+        import streamlit_app_native
+    except Exception as e:
+        st.error(f"App initialization error: {e}")
