@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Production build outputs
+dist/
+
+# Temp & Cache
+.vite/
+*.log
+
+# OS metadata
+.DS_Store
+Thumbs.db
